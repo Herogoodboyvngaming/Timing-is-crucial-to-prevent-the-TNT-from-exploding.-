@@ -66,18 +66,6 @@
             text-shadow: 0 0 20px #0f0;
             margin: 40px 0;
         }
-        .countdown-start {
-            font-size: 6em;
-            font-weight: bold;
-            color: #ff0;
-            text-shadow: 0 0 30px #ff0;
-            animation: pulseBig 1s infinite;
-        }
-        @keyframes pulseBig {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.2); }
-            100% { transform: scale(1); }
-        }
         .warning {
             font-size: 2em;
             color: #ff0000;
@@ -92,32 +80,24 @@
             0%,100% { opacity: 1; }
             50% { opacity: 0.3; }
         }
-        .btn {
+        .reset-btn {
             padding: 25px 60px;
             font-size: 2em;
+            background: #ff0000;
+            color: #fff;
             border: none;
             border-radius: 50px;
             cursor: pointer;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.7);
+            box-shadow: 0 10px 30px rgba(255,0,0,0.7);
             transition: all 0.3s;
             margin: 30px;
-        }
-        .start-btn {
-            background: #00ff00;
-            color: #000;
-        }
-        .start-btn:hover {
-            background: #00cc00;
-            transform: scale(1.1);
-        }
-        .reset-btn {
-            background: #ff0000;
-            color: #fff;
-            display: none;
         }
         .reset-btn:hover {
             transform: scale(1.1);
             box-shadow: 0 15px 40px rgba(255,0,0,0.9);
+        }
+        .reset-btn:active {
+            transform: scale(0.95);
         }
         .score {
             font-size: 3em;
@@ -172,7 +152,6 @@
             0%,100% { transform: scale(1); }
             50% { transform: scale(1.1); }
         }
-        .hidden { display: none; }
     </style>
 </head>
 <body>
@@ -186,18 +165,13 @@
         <div class="bomb"></div>
     </div>
 
-    <div class="timer hidden" id="timer">10</div>
-    <div class="countdown-start hidden" id="countdownStart">3</div>
+    <div class="timer" id="timer">10</div>
 
-    <div class="warning hidden" id="warning">
+    <div class="warning" id="warning">
         🚨 BOM CHUẨN BỊ NỔ! BẤM NÚT RESET MAU!!! 🚨
     </div>
 
-    <button class="btn start-btn" id="startBtn" onclick="startCountdown()">
-        🟢 BẤM ĐỂ BẮT ĐẦU 🟢
-    </button>
-
-    <button class="btn reset-btn hidden" id="resetBtn" onclick="resetBomb()">
+    <button class="reset-btn" id="resetBtn" onclick="resetBomb()">
         🔴 BẤM ĐỂ RESET 🔴
     </button>
 
@@ -212,37 +186,16 @@
     <script>
         let timeLeft = 10;
         let timerInterval;
-        let countdownInterval;
         let score = 0;
         let isWarning = false;
-        let gameStarted = false;
-
-        function startCountdown() {
-            document.getElementById('startBtn').classList.add('hidden');
-            document.getElementById('countdownStart').classList.remove('hidden');
-
-            let count = 3;
-            document.getElementById('countdownStart').textContent = count;
-
-            countdownInterval = setInterval(() => {
-                count--;
-                if (count > 0) {
-                    document.getElementById('countdownStart').textContent = count;
-                } else {
-                    clearInterval(countdownInterval);
-                    document.getElementById('countdownStart').classList.add('hidden');
-                    document.getElementById('timer').classList.remove('hidden');
-                    document.getElementById('resetBtn').classList.remove('hidden');
-                    startGame();
-                }
-            }, 1000);
-        }
+        let gameOver = false; // Thêm biến để kiểm tra bom đã nổ chưa
 
         function startGame() {
-            gameStarted = true;
-            timeLeft = Math.floor(Math.random() * 21) + 10; // Random 10-30 giây
+            gameOver = false;
+            // Random thời gian 10-30 giây
+            timeLeft = Math.floor(Math.random() * 21) + 10;
             document.getElementById('timer').textContent = timeLeft;
-            document.getElementById('warning').classList.add('hidden');
+            document.getElementById('warning').style.display = 'none';
             isWarning = false;
 
             clearInterval(timerInterval);
@@ -250,43 +203,49 @@
         }
 
         function countdown() {
+            if (gameOver) return;
+
             timeLeft--;
             document.getElementById('timer').textContent = timeLeft;
 
+            // Cảnh báo khi còn ≤3 giây
             if (timeLeft <= 3 && !isWarning) {
                 isWarning = true;
-                document.getElementById('warning').classList.remove('hidden');
+                document.getElementById('warning').style.display = 'block';
                 document.body.style.background = 'linear-gradient(135deg, #330000, #000)';
             }
 
+            // Đúng lúc về 0 → BOM NỔ NGAY, không cho bấm nữa
             if (timeLeft <= 0) {
+                gameOver = true;
                 clearInterval(timerInterval);
                 explode();
             }
         }
 
         function resetBomb() {
-            if (gameStarted && timeLeft > 0) {
-                score += 10; // Mỗi lần sống sót +10 điểm
+            // Chỉ cho bấm khi còn thời gian (>0) và chưa nổ
+            if (timeLeft > 0 && !gameOver) {
+                score += 10;
                 document.getElementById('score').textContent = score;
                 startGame(); // Random thời gian mới
             }
         }
 
         function explode() {
-            gameStarted = false;
             document.getElementById('explosion').style.display = 'flex';
             setTimeout(() => {
                 document.getElementById('explosion').style.display = 'none';
                 document.body.style.background = 'linear-gradient(135deg, #1a1a1a, #000)';
-                document.getElementById('timer').classList.add('hidden');
-                document.getElementById('warning').classList.add('hidden');
-                document.getElementById('resetBtn').classList.add('hidden');
-                document.getElementById('startBtn').classList.remove('hidden');
+                document.getElementById('warning').style.display = 'none';
                 score = 0;
                 document.getElementById('score').textContent = score;
+                startGame(); // Tự động chơi lại
             }, 2000);
         }
+
+        // TỰ ĐỘNG BẮT ĐẦU
+        startGame();
     </script>
 </body>
 </html>
