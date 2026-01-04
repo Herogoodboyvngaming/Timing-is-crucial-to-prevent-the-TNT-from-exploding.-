@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CANH THỜI GIAN BẤM NÚT - KHÔNG LÀ BOM NỔ THUA LUÔN!</title>
+    <title>CANH THỜI GIAN BẤM NÚT - ĐẠT LEVEL 100 ĐỂ WIN!</title>
     <style>
         body {
             font-family: 'Arial Black', Arial, sans-serif;
@@ -18,9 +18,10 @@
             justify-content: center;
             align-items: center;
             overflow: hidden;
+            transition: background 1.5s ease;
         }
         h1 {
-            font-size: 3em;
+            font-size: 2.8em;
             color: #ff0000;
             text-shadow: 0 0 20px #ff0000, 0 0 40px #ff0000;
             margin: 20px;
@@ -29,6 +30,18 @@
         @keyframes glow {
             from { text-shadow: 0 0 10px #ff0000; }
             to { text-shadow: 0 0 30px #ff0000, 0 0 60px #ff0000; }
+        }
+        .level {
+            font-size: 3em;
+            color: #ffd700;
+            text-shadow: 0 0 20px #ffd700;
+            margin: 10px;
+        }
+        .score {
+            font-size: 2.5em;
+            margin: 10px;
+            color: #0f0;
+            text-shadow: 0 0 15px #0f0;
         }
         .bomb-container {
             position: relative;
@@ -65,6 +78,7 @@
             color: #0f0;
             text-shadow: 0 0 20px #0f0;
             margin: 40px 0;
+            display: none;
         }
         .warning {
             font-size: 2em;
@@ -73,40 +87,45 @@
             padding: 15px;
             border-radius: 15px;
             margin: 20px;
-            animation: blink 0.5s infinite;
+            animation: blink 0.4s infinite;
             display: none;
         }
         @keyframes blink {
             0%,100% { opacity: 1; }
-            50% { opacity: 0.3; }
+            50% { opacity: 0.4; }
         }
-        .reset-btn {
+        .notice {
+            font-size: 1.8em;
+            color: #ff6600;
+            margin: 20px;
+            min-height: 50px;
+        }
+        .btn {
             padding: 25px 60px;
             font-size: 2em;
-            background: #ff0000;
-            color: #fff;
             border: none;
             border-radius: 50px;
             cursor: pointer;
-            box-shadow: 0 10px 30px rgba(255,0,0,0.7);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.7);
             transition: all 0.3s;
-            margin: 30px;
+            margin: 20px;
+        }
+        .start-btn {
+            background: #00ff00;
+            color: #000;
+        }
+        .start-btn:hover {
+            background: #00cc00;
+            transform: scale(1.1);
+        }
+        .reset-btn {
+            background: #ff0000;
+            color: #fff;
+            display: none;
         }
         .reset-btn:hover {
             transform: scale(1.1);
             box-shadow: 0 15px 40px rgba(255,0,0,0.9);
-        }
-        .reset-btn:active {
-            transform: scale(0.95);
-        }
-        .score {
-            font-size: 3em;
-            margin: 20px;
-            color: #0f0;
-            text-shadow: 0 0 20px #0f0;
-            padding: 10px 30px;
-            background: rgba(0,0,0,0.5);
-            border-radius: 20px;
         }
         .explosion {
             position: fixed;
@@ -120,11 +139,28 @@
             color: #fff;
             animation: explode 1s;
         }
+        .win-effect {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: radial-gradient(circle, #ffd700, #000);
+            z-index: 1000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            font-size: 5em;
+            color: #fff;
+            animation: winGlow 2s infinite;
+        }
+        @keyframes winGlow {
+            0% { text-shadow: 0 0 20px #fff; }
+            50% { text-shadow: 0 0 60px #ffd700, 0 0 100px #ffd700; }
+            100% { text-shadow: 0 0 20px #fff; }
+        }
         @keyframes explode {
             0% { transform: scale(0); opacity: 1; }
             100% { transform: scale(3); opacity: 0; }
         }
-        .boom-text {
+        .boom-text, .win-text {
             animation: shake 0.5s infinite;
         }
         @keyframes shake {
@@ -156,8 +192,10 @@
 </head>
 <body>
     <h1>CANH THỜI GIAN BẤM NÚT</h1>
-    <h2 style="color:#ff0;">KHÔNG LÀ BOM NỔ - THUA LUÔN NHA!</h2>
+    <h2 style="color:#ff0;">CHỈ ĐƯỢC BẤM RESET TRONG 5 GIÂY CUỐI!</h2>
+    <h2 style="color:#ffd700;">ĐẠT LEVEL 100 ĐỂ WIN!</h2>
 
+    <div class="level">LEVEL: <span id="level">1</span></div>
     <div class="score">ĐIỂM: <span id="score">0</span></div>
 
     <div class="bomb-container">
@@ -168,15 +206,25 @@
     <div class="timer" id="timer">10</div>
 
     <div class="warning" id="warning">
-        🚨 BOM CHUẨN BỊ NỔ! BẤM NÚT RESET MAU!!! 🚨
+        🚨 CHỈ CÒN 5 GIÂY! BẤM RESET NGAY!!! 🚨
     </div>
 
-    <button class="reset-btn" id="resetBtn" onclick="resetBomb()">
-        🔴 BẤM ĐỂ RESET 🔴
+    <div class="notice" id="notice"></div>
+
+    <button class="btn start-btn" id="startBtn" onclick="handleStart()">
+        🟢 BẮM ĐỂ BẮT ĐẦU 🟢
+    </button>
+
+    <button class="btn reset-btn" id="resetBtn" onclick="tryReset()">
+        🔴 BẤM RESET (CHỈ TRONG 5S CUỐI) 🔴
     </button>
 
     <div class="explosion" id="explosion">
         <div class="boom-text">💥 BOOM!!! 💥<br>THUA RỒI ANH ƠI 😭</div>
+    </div>
+
+    <div class="win-effect" id="winEffect">
+        <div class="win-text">🎉 CHÚC MỪNG WIN!!! 🎉<br>BẠN ĐÃ ĐẠT LEVEL 100!<br>SIÊU NHÂN CANH BOM!!! 🏆✨</div>
     </div>
 
     <div class="footer">
@@ -187,12 +235,47 @@
         let timeLeft = 10;
         let timerInterval;
         let score = 0;
+        let level = 1;
         let isWarning = false;
-        let gameOver = false; // Thêm biến để kiểm tra bom đã nổ chưa
+        let gameActive = false;
+        let isAfterEnd = false; // Để biết là sau thua hay win
+
+        function updateBackground() {
+            if (level <= 20) {
+                document.body.style.background = 'linear-gradient(135deg, #1a1a1a, #000)';
+            } else if (level <= 40) {
+                document.body.style.background = 'linear-gradient(135deg, #330000, #660000)';
+            } else if (level <= 60) {
+                document.body.style.background = 'linear-gradient(135deg, #660000, #990000)';
+            } else if (level <= 80) {
+                document.body.style.background = 'linear-gradient(135deg, #330033, #660066)';
+            } else if (level <= 99) {
+                document.body.style.background = 'linear-gradient(135deg, #003300, #006600)';
+            } else {
+                document.body.style.background = 'linear-gradient(135deg, #ffaa00, #ffd700)';
+            }
+        }
+
+        function handleStart() {
+            let confirmMsg = isAfterEnd ? "Bạn có chắc muốn chơi lại từ level 1 không?" : "Bắt đầu game nhé?";
+            if (confirm(confirmMsg)) {
+                isAfterEnd = false;
+                document.getElementById('startBtn').textContent = '🟢 BẮM ĐỂ BẮT ĐẦU 🟢';
+                document.getElementById('startBtn').style.background = '#00ff00';
+                startGame();
+            }
+            // Nếu không confirm thì không làm gì, ở nguyên màn hình
+        }
 
         function startGame() {
-            gameOver = false;
-            // Random thời gian 10-30 giây
+            document.getElementById('startBtn').style.display = 'none';
+            document.getElementById('resetBtn').style.display = 'block';
+            document.getElementById('timer').style.display = 'block';
+            document.getElementById('notice').textContent = '';
+
+            gameActive = true;
+            updateBackground();
+
             timeLeft = Math.floor(Math.random() * 21) + 10;
             document.getElementById('timer').textContent = timeLeft;
             document.getElementById('warning').style.display = 'none';
@@ -203,49 +286,94 @@
         }
 
         function countdown() {
-            if (gameOver) return;
+            if (!gameActive) return;
 
             timeLeft--;
             document.getElementById('timer').textContent = timeLeft;
 
-            // Cảnh báo khi còn ≤3 giây
-            if (timeLeft <= 3 && !isWarning) {
+            if (timeLeft <= 5 && !isWarning) {
                 isWarning = true;
                 document.getElementById('warning').style.display = 'block';
-                document.body.style.background = 'linear-gradient(135deg, #330000, #000)';
             }
 
-            // Đúng lúc về 0 → BOM NỔ NGAY, không cho bấm nữa
             if (timeLeft <= 0) {
-                gameOver = true;
                 clearInterval(timerInterval);
                 explode();
             }
         }
 
-        function resetBomb() {
-            // Chỉ cho bấm khi còn thời gian (>0) và chưa nổ
-            if (timeLeft > 0 && !gameOver) {
+        function tryReset() {
+            if (!gameActive) return;
+
+            if (timeLeft <= 5 && timeLeft > 0) {
                 score += 10;
+                level += 1;
                 document.getElementById('score').textContent = score;
-                startGame(); // Random thời gian mới
+                document.getElementById('level').textContent = level;
+                updateBackground();
+
+                if (level >= 100) {
+                    winGame();
+                } else {
+                    document.getElementById('notice').textContent = '🎉 THÀNH CÔNG! +10 ĐIỂM, LÊN LEVEL ' + level + '!';
+                    setTimeout(() => { document.getElementById('notice').textContent = ''; }, 2000);
+                    startGame();
+                }
+            } else {
+                document.getElementById('notice').textContent = '⛔ Chưa đến lúc bấm! Chỉ được bấm khi còn ≤5 giây!';
+                setTimeout(() => { document.getElementById('notice').textContent = ''; }, 2000);
             }
         }
 
         function explode() {
+            gameActive = false;
+            isAfterEnd = true;
             document.getElementById('explosion').style.display = 'flex';
+
             setTimeout(() => {
                 document.getElementById('explosion').style.display = 'none';
                 document.body.style.background = 'linear-gradient(135deg, #1a1a1a, #000)';
                 document.getElementById('warning').style.display = 'none';
+
+                level = 1;
                 score = 0;
+                document.getElementById('level').textContent = level;
                 document.getElementById('score').textContent = score;
-                startGame(); // Tự động chơi lại
-            }, 2000);
+                updateBackground();
+                document.getElementById('timer').style.display = 'none';
+                document.getElementById('resetBtn').style.display = 'none';
+                document.getElementById('startBtn').style.display = 'block';
+                document.getElementById('startBtn').textContent = '🔴 RESTART GAME 🔴';
+                document.getElementById('startBtn').style.background = '#ff0000';
+                document.getElementById('notice').textContent = '💔 Thua rồi... Bấm RESTART để chơi lại nha!';
+            }, 3000);
         }
 
-        // TỰ ĐỘNG BẮT ĐẦU
-        startGame();
+        function winGame() {
+            gameActive = false;
+            isAfterEnd = true;
+            clearInterval(timerInterval);
+            document.getElementById('winEffect').style.display = 'flex';
+
+            setTimeout(() => {
+                document.getElementById('winEffect').style.display = 'none';
+                document.body.style.background = 'linear-gradient(135deg, #1a1a1a, #000)';
+                level = 1;
+                score = 0;
+                document.getElementById('level').textContent = level;
+                document.getElementById('score').textContent = score;
+                updateBackground();
+                document.getElementById('timer').style.display = 'none';
+                document.getElementById('resetBtn').style.display = 'none';
+                document.getElementById('startBtn').style.display = 'block';
+                document.getElementById('startBtn').textContent = '🔴 RESTART GAME 🔴';
+                document.getElementById('startBtn').style.background = '#ff0000';
+                document.getElementById('notice').textContent = '🎊 XUẤT SẮC! Bấm RESTART để chơi lại từ level 1 nha!';
+            }, 8000);
+        }
+
+        // Khởi tạo
+        updateBackground();
     </script>
 </body>
 </html>
