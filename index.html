@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CANH THỜI GIAN BẤM NÚT - KHÔNG LÀ BOM NỔ THUA LUÔN!</title>
+    <style>
+        body {
+            font-family: 'Arial Black', Arial, sans-serif;
+            text-align: center;
+            background: linear-gradient(135deg, #1a1a1a, #000);
+            color: #fff;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+        h1 {
+            font-size: 3em;
+            color: #ff0000;
+            text-shadow: 0 0 20px #ff0000, 0 0 40px #ff0000;
+            margin: 20px;
+            animation: glow 1.5s infinite alternate;
+        }
+        @keyframes glow {
+            from { text-shadow: 0 0 10px #ff0000; }
+            to { text-shadow: 0 0 30px #ff0000, 0 0 60px #ff0000; }
+        }
+        .bomb-container {
+            position: relative;
+            width: 300px;
+            height: 400px;
+            margin: 30px;
+        }
+        .bomb {
+            width: 200px;
+            height: 250px;
+            background: #333;
+            border-radius: 50px;
+            margin: 0 auto;
+            position: relative;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.8);
+        }
+        .wire {
+            width: 10px;
+            height: 100px;
+            background: #f00;
+            position: absolute;
+            top: -80px;
+            left: 95px;
+            border-radius: 5px;
+            animation: spark 0.8s infinite;
+        }
+        @keyframes spark {
+            0%,100% { box-shadow: 0 0 10px #ff0; }
+            50% { box-shadow: 0 0 30px #ff0, 0 0 50px #ff0; }
+        }
+        .timer {
+            font-size: 5em;
+            font-weight: bold;
+            color: #0f0;
+            text-shadow: 0 0 20px #0f0;
+            margin: 40px 0;
+        }
+        .countdown-start {
+            font-size: 6em;
+            font-weight: bold;
+            color: #ff0;
+            text-shadow: 0 0 30px #ff0;
+            animation: pulseBig 1s infinite;
+        }
+        @keyframes pulseBig {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+        .warning {
+            font-size: 2em;
+            color: #ff0000;
+            background: rgba(255,0,0,0.3);
+            padding: 15px;
+            border-radius: 15px;
+            margin: 20px;
+            animation: blink 0.5s infinite;
+            display: none;
+        }
+        @keyframes blink {
+            0%,100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+        .btn {
+            padding: 25px 60px;
+            font-size: 2em;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.7);
+            transition: all 0.3s;
+            margin: 30px;
+        }
+        .start-btn {
+            background: #00ff00;
+            color: #000;
+        }
+        .start-btn:hover {
+            background: #00cc00;
+            transform: scale(1.1);
+        }
+        .reset-btn {
+            background: #ff0000;
+            color: #fff;
+            display: none;
+        }
+        .reset-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 15px 40px rgba(255,0,0,0.9);
+        }
+        .score {
+            font-size: 3em;
+            margin: 20px;
+            color: #0f0;
+            text-shadow: 0 0 20px #0f0;
+            padding: 10px 30px;
+            background: rgba(0,0,0,0.5);
+            border-radius: 20px;
+        }
+        .explosion {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: radial-gradient(circle, #ff4500, #000);
+            z-index: 1000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            font-size: 6em;
+            color: #fff;
+            animation: explode 1s;
+        }
+        @keyframes explode {
+            0% { transform: scale(0); opacity: 1; }
+            100% { transform: scale(3); opacity: 0; }
+        }
+        .boom-text {
+            animation: shake 0.5s infinite;
+        }
+        @keyframes shake {
+            0% { transform: translate(1px, 1px) rotate(0deg); }
+            10% { transform: translate(-1px, -2px) rotate(-1deg); }
+            20% { transform: translate(-3px, 0px) rotate(1deg); }
+            30% { transform: translate(3px, 2px) rotate(0deg); }
+            40% { transform: translate(1px, -1px) rotate(1deg); }
+            50% { transform: translate(-1px, 2px) rotate(-1deg); }
+            60% { transform: translate(-3px, 1px) rotate(0deg); }
+            70% { transform: translate(3px, 1px) rotate(-1deg); }
+            80% { transform: translate(-1px, -1px) rotate(1deg); }
+            90% { transform: translate(1px, 2px) rotate(0deg); }
+            100% { transform: translate(1px, -2px) rotate(-1deg); }
+        }
+        .footer {
+            position: fixed;
+            bottom: 20px;
+            font-size: 1.8em;
+            color: #ff6b6b;
+            text-shadow: 0 0 15px #ff6b6b;
+            animation: pulseHeart 1.5s infinite;
+        }
+        @keyframes pulseHeart {
+            0%,100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+    <h1>CANH THỜI GIAN BẤM NÚT</h1>
+    <h2 style="color:#ff0;">KHÔNG LÀ BOM NỔ - THUA LUÔN NHA!</h2>
+
+    <div class="score">ĐIỂM: <span id="score">0</span></div>
+
+    <div class="bomb-container">
+        <div class="wire"></div>
+        <div class="bomb"></div>
+    </div>
+
+    <div class="timer hidden" id="timer">10</div>
+    <div class="countdown-start hidden" id="countdownStart">3</div>
+
+    <div class="warning hidden" id="warning">
+        🚨 BOM CHUẨN BỊ NỔ! BẤM NÚT RESET MAU!!! 🚨
+    </div>
+
+    <button class="btn start-btn" id="startBtn" onclick="startCountdown()">
+        🟢 BẤM ĐỂ BẮT ĐẦU 🟢
+    </button>
+
+    <button class="btn reset-btn hidden" id="resetBtn" onclick="resetBomb()">
+        🔴 BẤM ĐỂ RESET 🔴
+    </button>
+
+    <div class="explosion" id="explosion">
+        <div class="boom-text">💥 BOOM!!! 💥<br>THUA RỒI ANH ƠI 😭</div>
+    </div>
+
+    <div class="footer">
+        MADE BY: NGUYỄN CHÍ DỰ ♥️
+    </div>
+
+    <script>
+        let timeLeft = 10;
+        let timerInterval;
+        let countdownInterval;
+        let score = 0;
+        let isWarning = false;
+        let gameStarted = false;
+
+        function startCountdown() {
+            document.getElementById('startBtn').classList.add('hidden');
+            document.getElementById('countdownStart').classList.remove('hidden');
+
+            let count = 3;
+            document.getElementById('countdownStart').textContent = count;
+
+            countdownInterval = setInterval(() => {
+                count--;
+                if (count > 0) {
+                    document.getElementById('countdownStart').textContent = count;
+                } else {
+                    clearInterval(countdownInterval);
+                    document.getElementById('countdownStart').classList.add('hidden');
+                    document.getElementById('timer').classList.remove('hidden');
+                    document.getElementById('resetBtn').classList.remove('hidden');
+                    startGame();
+                }
+            }, 1000);
+        }
+
+        function startGame() {
+            gameStarted = true;
+            timeLeft = Math.floor(Math.random() * 21) + 10; // Random 10-30 giây
+            document.getElementById('timer').textContent = timeLeft;
+            document.getElementById('warning').classList.add('hidden');
+            isWarning = false;
+
+            clearInterval(timerInterval);
+            timerInterval = setInterval(countdown, 1000);
+        }
+
+        function countdown() {
+            timeLeft--;
+            document.getElementById('timer').textContent = timeLeft;
+
+            if (timeLeft <= 3 && !isWarning) {
+                isWarning = true;
+                document.getElementById('warning').classList.remove('hidden');
+                document.body.style.background = 'linear-gradient(135deg, #330000, #000)';
+            }
+
+            if (timeLeft <= 0) {
+                clearInterval(timerInterval);
+                explode();
+            }
+        }
+
+        function resetBomb() {
+            if (gameStarted && timeLeft > 0) {
+                score += 10; // Mỗi lần sống sót +10 điểm
+                document.getElementById('score').textContent = score;
+                startGame(); // Random thời gian mới
+            }
+        }
+
+        function explode() {
+            gameStarted = false;
+            document.getElementById('explosion').style.display = 'flex';
+            setTimeout(() => {
+                document.getElementById('explosion').style.display = 'none';
+                document.body.style.background = 'linear-gradient(135deg, #1a1a1a, #000)';
+                document.getElementById('timer').classList.add('hidden');
+                document.getElementById('warning').classList.add('hidden');
+                document.getElementById('resetBtn').classList.add('hidden');
+                document.getElementById('startBtn').classList.remove('hidden');
+                score = 0;
+                document.getElementById('score').textContent = score;
+            }, 2000);
+        }
+    </script>
+</body>
+</html>
